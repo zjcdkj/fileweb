@@ -1,6 +1,6 @@
 'use client';
 
-import { FC } from 'react';
+import React from 'react';
 import { 
   FolderPlusIcon, 
   ArrowUpTrayIcon,
@@ -18,6 +18,10 @@ interface FileToolbarProps {
   onCreateFolder: () => void;
   onUpload: () => void;
   onSearch: (query: string) => void;
+  onFolderOpen: (folder: IFolder | null) => void;
+  folders?: IFolder[]; // 添加 folders 属性
+  folderPath: IFolder[];
+  allFolders: IFolder[];
 }
 
 const FileToolbar: FC<FileToolbarProps> = ({
@@ -28,6 +32,10 @@ const FileToolbar: FC<FileToolbarProps> = ({
   onCreateFolder,
   onUpload,
   onSearch,
+  onFolderOpen,
+  folders = [], // 提供默认值
+  folderPath,
+  allFolders,
 }) => {
   return (
     <div className="flex flex-col border-b border-[#E5E6E8]">
@@ -52,15 +60,27 @@ const FileToolbar: FC<FileToolbarProps> = ({
       {/* 文件路径和操作按钮 */}
       <div className="flex items-center justify-between h-[56px] px-6">
         <div className="flex items-center text-[14px]">
-          <span className="text-[#1F2329] hover:text-[#3370FF] cursor-pointer">我的空间</span>
-          <ChevronRightIcon className="w-4 h-4 mx-1 text-[#86909C]" />
-          <span className="text-[#1F2329] hover:text-[#3370FF] cursor-pointer">AIGC</span>
-          {currentFolder && (
-            <>
+          <span 
+            className="text-[#1F2329] hover:text-[#3370FF] cursor-pointer"
+            onClick={() => onFolderOpen(null)}
+          >
+            我的空间
+          </span>
+          {folderPath.map((folder, index) => (
+            <React.Fragment key={folder._id}>
               <ChevronRightIcon className="w-4 h-4 mx-1 text-[#86909C]" />
-              <span className="text-[#1F2329]">{currentFolder.name}</span>
-            </>
-          )}
+              <span 
+                className={`${
+                  index === folderPath.length - 1 
+                    ? 'text-[#1F2329]' 
+                    : 'text-[#1F2329] hover:text-[#3370FF] cursor-pointer'
+                }`}
+                onClick={() => index < folderPath.length - 1 && onFolderOpen(folder)}
+              >
+                {folder.name}
+              </span>
+            </React.Fragment>
+          ))}
         </div>
         <div className="flex items-center space-x-2">
           <button

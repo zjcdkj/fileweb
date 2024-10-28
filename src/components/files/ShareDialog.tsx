@@ -16,6 +16,7 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
   const [expiryDays, setExpiryDays] = useState('7');
   const [shareUrl, setShareUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
     setIsLoading(true);
@@ -24,13 +25,14 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fileId: item._id,
+          fileId: 'extension' in item ? item._id : undefined,
+          folderId: !('extension' in item) ? item._id : undefined,
           password: shareType === 'password' ? password : undefined,
-          expiresIn: parseInt(expiryDays) * 24 * 60 * 60 * 1000, // 转换为毫秒
+          expiresIn: expiryDays === 'forever' ? null : parseInt(expiryDays) * 24 * 60 * 60 * 1000,
         }),
       });
 
-      if (!response.ok) throw new Error('分享创建失败');
+      if (!response.ok) throw new Error('创建分享失败');
 
       const data = await response.json();
       setShareUrl(`${window.location.origin}/share/${data.code}`);
@@ -44,7 +46,8 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      alert('链接已复制到剪贴板');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('复制失败:', error);
     }
@@ -53,27 +56,25 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium">分享 {item.name}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg w-full max-w-md">
+        <div className="px-6 py-4 border-b border-[#E5E6E8] flex justify-between items-center">
+          <h3 className="text-[16px] font-medium text-[#1F2329]">分享 {item.name}</h3>
+          <button onClick={onClose} className="text-[#646A73] hover:text-[#1F2329]">
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              分享方式
-            </label>
+            <label className="block text-sm font-medium text-[#1F2329] mb-2">分享方式</label>
             <div className="flex space-x-4">
               <button
                 onClick={() => setShareType('link')}
                 className={`px-4 py-2 rounded ${
                   shareType === 'link'
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-[#F0F7FF] text-[#3370FF]'
+                    : 'bg-[#F5F6F7] text-[#1F2329]'
                 }`}
               >
                 链接分享
@@ -82,8 +83,8 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
                 onClick={() => setShareType('password')}
                 className={`px-4 py-2 rounded ${
                   shareType === 'password'
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-[#F0F7FF] text-[#3370FF]'
+                    : 'bg-[#F5F6F7] text-[#1F2329]'
                 }`}
               >
                 密码分享
@@ -93,27 +94,27 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
 
           {shareType === 'password' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[#1F2329] mb-2">
                 访问密码
               </label>
               <input
                 type="text"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#E5E6E8] rounded-lg text-[14px]"
                 placeholder="请输入访问密码"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#1F2329] mb-2">
               有效期
             </label>
             <select
               value={expiryDays}
               onChange={(e) => setExpiryDays(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#E5E6E8] rounded-lg text-[14px]"
             >
               <option value="1">1天</option>
               <option value="7">7天</option>
@@ -126,7 +127,7 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
             <button
               onClick={handleShare}
               disabled={isLoading}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="w-full py-2 bg-[#3370FF] text-white rounded-lg hover:bg-[#2860DF] disabled:opacity-50"
             >
               {isLoading ? '创建中...' : '创建分享链接'}
             </button>
@@ -139,19 +140,22 @@ const ShareDialog: FC<ShareDialogProps> = ({ isOpen, item, onClose }) => {
                   type="text"
                   value={shareUrl}
                   readOnly
-                  className="flex-1 px-3 py-2 border rounded-lg bg-gray-50"
+                  className="flex-1 px-3 py-2 border border-[#E5E6E8] rounded-lg bg-[#F5F6F7]"
                 />
                 <button
                   onClick={handleCopyLink}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                  className="p-2 text-[#3370FF] hover:bg-[#F0F7FF] rounded"
                 >
                   <ClipboardIcon className="w-5 h-5" />
                 </button>
               </div>
+              {copied && (
+                <p className="text-[13px] text-green-500">链接已复制到剪贴板</p>
+              )}
               {shareType === 'password' && (
-                <div className="text-sm text-gray-500">
+                <p className="text-[13px] text-[#646A73]">
                   访问密码：{password}
-                </div>
+                </p>
               )}
             </div>
           )}

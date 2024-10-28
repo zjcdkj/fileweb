@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthOptions, User as NextAuthUser } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { connectDB } from '@/lib/db/connect';
-import User from '@/models/User';
+import { connectDB } from '../../../../lib/db/connect';  // 使用相对路径
+import User from '../../../../models/User';  // 使用相对路径
 
 interface Credentials {
   email: string;

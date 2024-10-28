@@ -20,11 +20,6 @@ async function parseMultipartForm(request: Request) {
   return { file, folderId };
 }
 
-// 编码文件名，移除非法字符
-function encodeFileName(fileName: string): string {
-  return Buffer.from(fileName).toString('base64');
-}
-
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -45,7 +40,7 @@ export async function POST(request: Request) {
     // 确保 bucket 存在
     await ensureBucket();
 
-    // 上传到 MinIO，使用 base64 编码的文件名作为元数据
+    // 上传到 MinIO
     await minioClient.putObject(
       BUCKET_NAME,
       filePath,
@@ -53,7 +48,6 @@ export async function POST(request: Request) {
       buffer.length,
       {
         'Content-Type': file.type,
-        'x-amz-meta-originalname': encodeFileName(originalName),
       }
     );
 
@@ -74,6 +68,7 @@ export async function POST(request: Request) {
 
     await fileDoc.save();
 
+    // 返回单个文件对象而不是数组
     return NextResponse.json({
       message: '文件上传成功',
       file: fileDoc
@@ -88,7 +83,6 @@ export async function POST(request: Request) {
   }
 }
 
-// 配置较大的请求体限制
 export const config = {
   api: {
     bodyParser: false,

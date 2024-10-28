@@ -10,6 +10,7 @@ import FileUpload from '@/components/files/FileUpload';
 import { IFile, IFolder } from '@/types/file';
 import CreateFolderDialog from '@/components/files/CreateFolderDialog';
 import { ViewMode } from '@/components/files/ViewToggle';
+import { SortField, SortOrder } from '@/components/files/SortButton';
 
 export default function FilesPage() {
   const { data: session, status } = useSession();
@@ -23,6 +24,10 @@ export default function FilesPage() {
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [allFolders, setAllFolders] = useState<IFolder[]>([]);
+  const [folderPath, setFolderPath] = useState<IFolder[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -46,6 +51,8 @@ export default function FilesPage() {
       const data = await response.json();
       setFiles(data.files);
       setFolders(data.folders);
+      setAllFolders(data.allFolders);
+      setFolderPath(data.folderPath || []);
     } catch (error) {
       console.error('加载文件错误:', error);
     } finally {
@@ -53,10 +60,43 @@ export default function FilesPage() {
     }
   };
 
+  // 添加强制刷新函数
+  const handleRefresh = async () => {
+    await loadFiles();
+  };
+
+  const handleFolderOpen = (folder: IFolder | null) => {
+    setCurrentFolder(folder);
+    setSelectedItems([]);
+  };
+
   // 添加搜索处理函数
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     // TODO: 实现搜索逻辑
+  };
+
+  const handleSort = (field: SortField, order: SortOrder) => {
+    setSortField(field);
+    setSortOrder(order);
+    
+    const sortedFiles = [...files].sort((a, b) => {
+      if (field === 'name') {
+        return order === 'asc' 
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      }
+      if (field === 'size') {
+        return order === 'asc'
+          ? a.size - b.size
+          : b.size - a.size;
+      }
+      return order === 'asc'
+        ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+        : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+
+    setFiles(sortedFiles);
   };
 
   if (status === 'loading' || isLoading) {
@@ -76,6 +116,9 @@ export default function FilesPage() {
           onCreateFolder={() => setIsCreatingFolder(true)}
           onUpload={() => setIsUploading(true)}
           onSearch={handleSearch}
+          onFolderOpen={handleFolderOpen}
+          folderPath={folderPath}
+          allFolders={allFolders}
         />
         <div className="flex-1 overflow-hidden flex flex-col">
           <FileList
@@ -85,14 +128,20 @@ export default function FilesPage() {
             viewMode={viewMode}
             onSelect={setSelectedItems}
             onFolderOpen={setCurrentFolder}
+            onRefresh={handleRefresh}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            onSort={handleSort}
           />
         </div>
         <FileUpload
           isOpen={isUploading}
           currentFolder={currentFolder}
           onClose={() => setIsUploading(false)}
-          onUploadComplete={(newFiles) => {
-            setFiles(prevFiles => [...prevFiles, ...newFiles]);
+          onUploadComplete={(uploadedFiles) => {
+            if (Array.isArray(uploadedFiles) && uploadedFiles.length > 0) {
+              setFiles(prevFiles => [...prevFiles, ...uploadedFiles]);
+            }
             setIsUploading(false);
           }}
         />

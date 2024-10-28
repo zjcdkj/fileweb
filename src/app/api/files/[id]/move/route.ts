@@ -26,43 +26,70 @@ export async function PATCH(
       if (!targetFolder) {
         return NextResponse.json({ message: '目标文件夹不存在' }, { status: 404 });
       }
+      if (targetFolder.createdBy.toString() !== session.user.id) {
+        return NextResponse.json({ message: '无权访问目标文件夹' }, { status: 403 });
+      }
     }
 
-    // 查找并移动文件
-    const file = await File.findById(params.id);
-    if (file) {
-      // 移动文件
-      const oldPath = file.path;
+    // 先尝试查找文件
+    let item = await File.findById(params.id);
+    let isFile = true;
+
+    // 如果不是文件，尝试查找文件夹
+    if (!item) {
+      item = await Folder.findById(params.id);
+      isFile = false;
+    }
+
+    if (!item) {
+      return NextResponse.json({ message: '项目不存在' }, { status: 404 });
+    }
+
+    // 验证权限
+    if (item.createdBy.toString() !== session.user.id && session.user.role !== 'admin') {
+      return NextResponse.json({ message: '无权操作此项目' }, { status: 403 });
+    }
+
+    if (isFile) {
+      const file = item as any;
+      // 生成新路径
       const newPath = `${session.user.id}/${targetFolderId || 'root'}/${file.name}`;
 
-      // 在 MinIO 中复制文件
-      await minioClient.copyObject(
-        BUCKET_NAME,
-        newPath,
-        `${BUCKET_NAME}/${oldPath}`
-      );
+      // 只有当新路径和旧路径不同时才移动文件
+      if (newPath !== file.path) {
+        // 在 MinIO 中移动文件
+        await minioClient.copyObject(
+          BUCKET_NAME,
+          newPath,
+          `${BUCKET_NAME}/${file.path}`
+        );
+        await minioClient.removeObject(BUCKET_NAME, file.path);
 
-      // 删除原文件
-      await minioClient.removeObject(BUCKET_NAME, oldPath);
+        // 更新文件记录
+        file.path = newPath;
+        file.folderId = targetFolderId || null;
+        await file.save();
+      }
+    } else {
+      const folder = item as any;
+      // 检查是否试图将文件夹移动到其子文件夹中
+      let parent = await Folder.findById(targetFolderId);
+      while (parent) {
+        if (parent._id.toString() === folder._id.toString()) {
+          return NextResponse.json(
+            { message: '不能将文件夹移动到其子文件夹中' },
+            { status: 400 }
+          );
+        }
+        parent = await Folder.findById(parent.parentId);
+      }
 
-      // 更新数据库记录
-      file.path = newPath;
-      file.folderId = targetFolderId || null;
-      await file.save();
-
-      return NextResponse.json({ message: '移动成功', file });
-    }
-
-    // 查找并移动文件夹
-    const folder = await Folder.findById(params.id);
-    if (folder) {
+      // 更新文件夹记录
       folder.parentId = targetFolderId || null;
       await folder.save();
-
-      return NextResponse.json({ message: '移动成功', folder });
     }
 
-    return NextResponse.json({ message: '文件或文件夹不存在' }, { status: 404 });
+    return NextResponse.json({ message: '移动成功', item });
   } catch (error) {
     console.error('移动失败:', error);
     return NextResponse.json(

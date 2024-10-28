@@ -17,6 +17,11 @@ export async function GET(request: Request) {
 
     await connectDB();
 
+    // 获取所有文件夹以构建路径
+    const allFolders = await Folder.find({
+      createdBy: session.user.id,
+    });
+
     // 获取当前文件夹的文件和子文件夹
     const [files, folders] = await Promise.all([
       File.find({
@@ -30,23 +35,24 @@ export async function GET(request: Request) {
       }).sort({ createdAt: -1 }),
     ]);
 
-    // 如果在子文件夹中，获取当前文件夹信息
-    let currentFolder = null;
+    // 如果在子文件夹中，获取完整的文件夹路径
+    let folderPath = [];
     if (folderId) {
-      currentFolder = await Folder.findOne({
-        _id: folderId,
-        createdBy: session.user.id,
-      });
-
-      if (!currentFolder) {
-        return NextResponse.json({ message: '文件夹不存在' }, { status: 404 });
+      let currentFolder = allFolders.find(f => f._id.toString() === folderId);
+      while (currentFolder) {
+        folderPath.unshift(currentFolder);
+        currentFolder = allFolders.find(
+          f => f._id.toString() === currentFolder?.parentId?.toString()
+        );
       }
     }
 
     return NextResponse.json({
       files,
       folders,
-      currentFolder,
+      currentFolder: folderId ? allFolders.find(f => f._id.toString() === folderId) : null,
+      folderPath,
+      allFolders, // 返回所有文件夹以供前端构建路径
     });
 
   } catch (error) {

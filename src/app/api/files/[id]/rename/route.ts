@@ -57,7 +57,7 @@ export async function PATCH(
         `${BUCKET_NAME}/${oldPath}`
       );
 
-      // 删���旧文件
+      // 删除旧文件
       await minioClient.removeObject(BUCKET_NAME, oldPath);
 
       // 更新数据库记录
