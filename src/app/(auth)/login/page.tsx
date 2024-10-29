@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,14 +45,13 @@ export default function LoginPage() {
         <div>
           <div className="flex items-center space-x-2">
             <div className="relative w-[42px] h-[42px]">
-              {/* 使用普通 img 标签 */}
-              <img 
-                src="/images/logo.png"
-                // src={`${process.env.NEXT_PUBLIC_BASE_URL}/images/logo.png`} 
+              <Image 
+                src="/logo.png"
                 alt="Logo" 
                 width={42}
                 height={42}
                 className="object-contain"
+                priority
               />
             </div>
             <h1 className="text-xl font-medium text-[#1F2329]">文件协同系统</h1>
@@ -62,10 +62,12 @@ export default function LoginPage() {
           </div>
         </div>
         <div className="relative w-full h-[300px]">
-          <img 
+          <Image 
             src="/images/login-illustration.png"
             alt="Login illustration"
-            className="w-full h-full object-contain"
+            fill
+            className="object-contain"
+            priority
           />
         </div>
       </div>
@@ -133,7 +135,7 @@ export default function LoginPage() {
             {/* 社交图标部分 */}
             <div className="flex justify-center space-x-6">
               <button type="button" className="p-2 rounded-full hover:bg-[#F5F6F7]">
-                <img 
+                <Image 
                   src="/images/wechat.png"
                   alt="WeChat" 
                   width={24}
@@ -142,7 +144,7 @@ export default function LoginPage() {
                 />
               </button>
               <button type="button" className="p-2 rounded-full hover:bg-[#F5F6F7]">
-                <img 
+                <Image 
                   src="/images/alipay.png"
                   alt="Alipay" 
                   width={24}
