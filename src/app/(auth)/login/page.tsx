@@ -41,44 +41,45 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* 左侧部分 */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-white">
+        {/* 背景图片容器 */}
+        <div className="absolute inset-0">
+          <Image 
+            src="https://5b0988e595225.cdn.sohucs.com/a_auto,c_cut,x_0,y_853,w_2500,h_1666/images/20181123/89487e2a54d5460ebb6c89fb77fb25ed.jpeg"
+            alt="Background"
+            fill
+            priority
+            className="object-cover"
+          />
+        </div>
+
         {/* 内容层 */}
         <div className="relative z-10 p-8 flex flex-col justify-between h-full">
           <div>
             <div className="flex items-center space-x-2">
               <div className="relative w-[42px] h-[42px]">
                 <Image 
-                  src="/images/logo.png"
+                  // src="/images/logo.png"
+                  src="http://gidata.gzgoodidea.com:9101/portal/%E6%95%B0%E6%99%BA%E5%B7%A5%E5%8E%82-%E6%95%B0%E6%8D%AE%E6%B2%BB%E7%90%86%E6%9C%8D%E5%8A%A1%E5%B9%B3%E5%8F%B0.png"
                   alt="Logo" 
-                  fill
+                  width={42}
+                  height={42}
                   className="object-contain"
                   priority
                 />
               </div>
-              <h1 className="text-xl font-medium text-[#1F2329]">文件协同系统</h1>
+              <h1 className="text-2xl font-medium text-white">文件协同系统</h1>
             </div>
             <div className="mt-32">
-              <h2 className="text-2xl font-medium mb-4">全新体验</h2>
-              <p className="text-[#646A73]">更快速、更高效、更专业、更用心。</p>
+              <h2 className="text-4xl font-bold text-white mb-4">全新体验</h2>
+              <p className="text-lg text-white/80">更快速、更高效、更专业、更用心。</p>
             </div>
-          </div>
-          
-          {/* 背景图片容器 - 调整到这个位置 */}
-          <div className="relative w-[200px] h-[160px]">
-            <Image 
-              src="/images/loginBg.png"
-              alt="Background"
-              fill
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, 200px"
-              priority
-            />
           </div>
         </div>
       </div>
 
       {/* 右侧部分 */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center bg-white">
         <div className="w-[400px]">
           <h2 className="text-2xl font-medium mb-8">欢迎登录</h2>
           <p className="text-[#646A73] mb-8">新用户？<Link href="/register" className="text-[#3370FF]">点击注册</Link></p>
@@ -132,28 +133,32 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#E5E6E8]"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
+              {/* <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-[#646A73]">其他登录方式</span>
-              </div>
+              </div> */}
             </div>
 
             {/* 社交图标部分 */}
-            <div className="flex justify-center space-x-6">
+            {/* <div className="flex justify-center space-x-6">
               <button type="button" className="p-2 rounded-full hover:bg-[#F5F6F7]">
-                <img 
+                <Image 
                   src="/images/wechat.png"
                   alt="WeChat" 
-                  className="w-6 h-6 object-contain"
+                  width={24}
+                  height={24}
+                  className="object-contain"
                 />
               </button>
               <button type="button" className="p-2 rounded-full hover:bg-[#F5F6F7]">
-                <img 
+                <Image 
                   src="/images/alipay.png"
                   alt="Alipay" 
-                  className="w-6 h-6 object-contain"
+                  width={24}
+                  height={24}
+                  className="object-contain"
                 />
               </button>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
