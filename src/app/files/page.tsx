@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/layout/Sidebar';
+import Sidebar from '../../components/layout/Sidebar';
 import FileList from '@/components/files/FileList';
 import FileToolbar from '@/components/files/FileToolbar';
 import FileUpload from '@/components/files/FileUpload';

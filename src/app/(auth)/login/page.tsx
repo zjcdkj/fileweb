@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
 
 
 export default function LoginPage() {
@@ -41,34 +41,39 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* 左侧部分 */}
-      <div className="flex-1 bg-[#F7F8FA] p-8 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center space-x-2">
-            <div className="relative w-[42px] h-[42px]">
-              <Image 
-                src="/logo.png"
-                alt="Logo" 
-                width={42}
-                height={42}
-                className="object-contain"
-                priority
-              />
+      <div className="flex-1 relative">
+        {/* 内容层 */}
+        <div className="relative z-10 p-8 flex flex-col justify-between h-full">
+          <div>
+            <div className="flex items-center space-x-2">
+              <div className="relative w-[42px] h-[42px]">
+                <Image 
+                  src="/images/logo.png"
+                  alt="Logo" 
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <h1 className="text-xl font-medium text-[#1F2329]">文件协同系统</h1>
             </div>
-            <h1 className="text-xl font-medium text-[#1F2329]">文件协同系统</h1>
+            <div className="mt-32">
+              <h2 className="text-2xl font-medium mb-4">全新体验</h2>
+              <p className="text-[#646A73]">更快速、更高效、更专业、更用心。</p>
+            </div>
           </div>
-          <div className="mt-32">
-            <h2 className="text-2xl font-medium mb-4">全新体验</h2>
-            <p className="text-[#646A73]">更快速、更高效、更专业、更用心。</p>
+          
+          {/* 背景图片容器 - 调整到这个位置 */}
+          <div className="relative w-[200px] h-[160px]">
+            <Image 
+              src="/images/loginBg.png"
+              alt="Background"
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 200px"
+              priority
+            />
           </div>
-        </div>
-        <div className="relative w-full h-[300px]">
-          <Image 
-            src="/images/login-illustration.png"
-            alt="Login illustration"
-            fill
-            className="object-contain"
-            priority
-          />
         </div>
       </div>
 
@@ -135,21 +140,17 @@ export default function LoginPage() {
             {/* 社交图标部分 */}
             <div className="flex justify-center space-x-6">
               <button type="button" className="p-2 rounded-full hover:bg-[#F5F6F7]">
-                <Image 
+                <img 
                   src="/images/wechat.png"
                   alt="WeChat" 
-                  width={24}
-                  height={24}
-                  className="object-contain"
+                  className="w-6 h-6 object-contain"
                 />
               </button>
               <button type="button" className="p-2 rounded-full hover:bg-[#F5F6F7]">
-                <Image 
+                <img 
                   src="/images/alipay.png"
                   alt="Alipay" 
-                  width={24}
-                  height={24}
-                  className="object-contain"
+                  className="w-6 h-6 object-contain"
                 />
               </button>
             </div>
